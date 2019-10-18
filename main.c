@@ -11,6 +11,11 @@ int main() {
 //read_JPEG_file (char * filename, int * image_width, int * image_height, int* num_components, JSAMPLE * output)
     read_JPEG_file((char* )filename, &image_width, &image_height, &components, &image);
 
+    int total = 0;
+    while(total < 3){
+        printf("%d \t", image[total]);
+        total += 1;
+    }
 
     //write_JPEG_file("out.jpg", image_width, image_height, 
 
