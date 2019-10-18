@@ -1,4 +1,4 @@
-#include "jpeg-9c/example.h"
+#include "example.h"
 #include<string.h>
 #include <math.h>
 

@@ -1,5 +1,5 @@
 thisproj: main.c jpeglib
-	gcc -g -Og -lm main.c jpeg-9c/example.c jpeg-9c/.libs/libjpeg.a -o main
+	gcc -g -Og -lm main.c example.c jpeg-9c/.libs/libjpeg.a -o main
 
 jpeglib: jpeg-9c/configure
 	chmod +x jpeg-9c/configure
