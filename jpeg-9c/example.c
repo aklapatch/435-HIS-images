@@ -13,7 +13,7 @@
  * routines in a different style if you prefer.
  */
 
-#include "example.h"
+#include <stdio.h>
 
 /*
  * Include file for users of JPEG library.
@@ -23,12 +23,14 @@
  * You may also wish to include "jerror.h".
  */
 
+#include "jpeglib.h"
 
 /*
  * <setjmp.h> is used for the optional error recovery mechanism shown in
  * the second part of the example.
  */
 
+#include <setjmp.h>
 
 
 
@@ -56,6 +58,9 @@
  * RGB color and is described by:
  */
 
+extern JSAMPLE * image_buffer;	/* Points to large array of R,G,B-order data */
+extern int image_height;	/* Number of rows in image */
+extern int image_width;		/* Number of columns in image */
 
 
 /*
@@ -63,11 +68,8 @@
  * and a compression quality factor are passed in.
  */
 
-//extern JSAMPLE * image_buffer;	/* Points to large array of R,G,B-order data */
-//extern int image_height;	/* Number of rows in image */
-// extern int image_width;		/* Number of columns in image */
 GLOBAL(void)
-write_JPEG_file (char * filename, int quality, int image_width, int image_height, JSAMPLE * image_buffer)
+write_JPEG_file (char * filename, int quality)
 {
   /* This struct contains the JPEG compression parameters and pointers to
    * working space (which is allocated as needed by the JPEG library).
@@ -271,12 +273,6 @@ my_error_exit (j_common_ptr cinfo)
   longjmp(myerr->setjmp_buffer, 1);
 }
 
-void put_scanline_someplace(JSAMPLE * ba, int row_stride, JSAMPLE * output, int offset){
-    int i;
-    for (i = 0; i < row_stride; ++i){
-        output[i + offset] = ba[i];
-    }
-}
 
 /*
  * Sample routine for JPEG decompression.  We assume that the source file name
@@ -285,7 +281,7 @@ void put_scanline_someplace(JSAMPLE * ba, int row_stride, JSAMPLE * output, int 
 
 
 GLOBAL(int)
-read_JPEG_file (char * filename, int * image_width, int * image_height, int* num_components, JSAMPLE** output)
+read_JPEG_file (char * filename)
 {
   /* This struct contains the JPEG decompression parameters and pointers to
    * working space (which is allocated as needed by the JPEG library).
@@ -296,9 +292,9 @@ read_JPEG_file (char * filename, int * image_width, int * image_height, int* num
    * struct, to avoid dangling-pointer problems.
    */
   struct my_error_mgr jerr;
-  JSAMPARRAY buffer;
   /* More stuff */
   FILE * infile;		/* source file */
+  JSAMPARRAY buffer;		/* Output row buffer */
   int row_stride;		/* physical row width in output buffer */
 
   /* In this example we want to open the input file before doing anything else,
@@ -363,37 +359,24 @@ read_JPEG_file (char * filename, int * image_width, int * image_height, int* num
    */ 
   /* JSAMPLEs per row in output buffer */
   row_stride = cinfo.output_width * cinfo.output_components;
-
-  *image_height = cinfo.output_height;
-  *image_width = cinfo.output_width;
-  *num_components = cinfo.num_components;
-  int total = cinfo.output_height * cinfo.output_width * cinfo.num_components;
-
-  *output = (JSAMPLE*)malloc(sizeof(JSAMPLE) * cinfo.num_components * cinfo.output_height * cinfo.output_width );
-  if (!output)  {
-    printf("Failed to allocate memory\n");
-    exit(1);
-  }
-
   /* Make a one-row-high sample array that will go away when done with image */
   buffer = (*cinfo.mem->alloc_sarray)
 		((j_common_ptr) &cinfo, JPOOL_IMAGE, row_stride, 1);
 
   /* Step 6: while (scan lines remain to be read) */
   /*           jpeg_read_scanlines(...); */
+
   /* Here we use the library's state variable cinfo.output_scanline as the
    * loop counter, so that we don't have to keep track ourselves.
    */
-  int i= 0 ;
   while (cinfo.output_scanline < cinfo.output_height) {
     /* jpeg_read_scanlines expects an array of pointers to scanlines.
      * Here the array is only one element long, but you could ask for
      * more than one scanline at a time if that's more convenient.
      */
-    (void) jpeg_read_scanlines(&cinfo, buffer, 1 );
+    (void) jpeg_read_scanlines(&cinfo, buffer, 1);
     /* Assume put_scanline_someplace wants a pointer and sample count. */
-    put_scanline_someplace( buffer[0], row_stride, *output, i );
-    i +=row_stride;
+    put_scanline_someplace(buffer[0], row_stride);
   }
 
   /* Step 7: Finish decompression */
