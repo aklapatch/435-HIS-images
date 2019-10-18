@@ -586,6 +586,7 @@ on me-ma
 config.status:1100: creating Makefile
 config.status:1100: creating libjpeg.pc
 config.status:1100: creating jconfig.h
+config.status:1281: jconfig.h is unchanged
 config.status:1329: executing depfiles commands
 config.status:1329: executing libtool commands
 
