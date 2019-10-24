@@ -7,7 +7,7 @@ jpeglib: jpeg-9c/configure
 
 
 clean: cleanjpg
-	rm -f i_*.jpg h_*.jpg s_*.jpg main
+	rm -f i_*.jpg h_*.jpg s_*.jpg main *raw
 
 cleanjpg:
 	cd jpeg-9c/; make clean
